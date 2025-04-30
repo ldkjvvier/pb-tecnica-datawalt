@@ -107,7 +107,7 @@ src/
 
 Puedes agregar aquí capturas de la aplicación en ejecución. Ejemplo:
 
-![Screenshot 1](/image.png)
+![Screenshot 1](./assets/image.png)
 
 ---
 
