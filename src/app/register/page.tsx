@@ -1,7 +1,7 @@
+// /app/register/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
 	Button,
 	Container,
@@ -10,35 +10,28 @@ import {
 	Box,
 	CircularProgress,
 	Paper,
-	Link,
 } from '@mui/material'
+import { useRouter } from 'next/navigation'
 
-export default function Home() {
+export default function Register() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [confirmPassword, setConfirmPassword] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
-	const [isLoggedIn, setIsLoggedIn] = useState(false)
 	const router = useRouter()
 
-	useEffect(() => {
-		const checkLogin = async () => {
-			const res = await fetch('/api/check-login')
-			const data = await res.json()
-			if (data.isLoggedIn) {
-				setIsLoggedIn(true)
-				router.push('/posts')
-			}
-		}
-		checkLogin()
-	}, [router])
-
-	const handleLogin = async (e: React.FormEvent) => {
+	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault()
+		if (password !== confirmPassword) {
+			setError('Passwords do not match')
+			return
+		}
+
 		setLoading(true)
 		setError('')
 		try {
-			const response = await fetch('/api/login', {
+			const response = await fetch('/api/register', {
 				method: 'POST',
 				body: JSON.stringify({ email, password }),
 				headers: { 'Content-Type': 'application/json' },
@@ -46,30 +39,25 @@ export default function Home() {
 			const data = await response.json()
 
 			if (response.ok) {
-				setIsLoggedIn(true)
-				router.push('/posts')
+				router.push('/')
 			} else {
-				setError(data.error || 'Login failed')
+				setError(data.error || 'Registration failed')
 			}
 		} catch (err) {
 			console.log(err)
-			setError('An error occurred during login')
+			setError('An error occurred during registration')
 		} finally {
 			setLoading(false)
 		}
-	}
-
-	if (isLoggedIn) {
-		return <Typography>Redirecting...</Typography>
 	}
 
 	return (
 		<Container maxWidth="sm" sx={{ mt: 6 }}>
 			<Paper elevation={3} sx={{ padding: 3 }}>
 				<Typography variant="h4" gutterBottom>
-					Login
+					Register
 				</Typography>
-				<form onSubmit={handleLogin}>
+				<form onSubmit={handleRegister}>
 					<TextField
 						label="Email"
 						type="email"
@@ -88,6 +76,15 @@ export default function Home() {
 						required
 						sx={{ mb: 2 }}
 					/>
+					<TextField
+						label="Confirm Password"
+						type="password"
+						value={confirmPassword}
+						onChange={(e) => setConfirmPassword(e.target.value)}
+						fullWidth
+						required
+						sx={{ mb: 2 }}
+					/>
 					{error && <Typography color="error">{error}</Typography>}
 					<Box
 						sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
@@ -98,20 +95,10 @@ export default function Home() {
 							color="primary"
 							disabled={loading}
 						>
-							{loading ? <CircularProgress size={24} /> : 'Login'}
+							{loading ? <CircularProgress size={24} /> : 'Register'}
 						</Button>
 					</Box>
 				</form>
-				<Box
-					sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
-				>
-					<Typography variant="body2">
-						Don&apos;t have an account?{' '}
-						<Link href="/register" underline="hover" color="primary">
-							Register here
-						</Link>
-					</Typography>
-				</Box>
 			</Paper>
 		</Container>
 	)
